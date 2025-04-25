@@ -1156,7 +1156,7 @@ class UI:
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-@staticmethod
+    @staticmethod
     def system_settings_page(api: CashPointPayAPI):
         """システム設定ページ表示"""
         st.markdown('<div class="card">', unsafe_allow_html=True)
