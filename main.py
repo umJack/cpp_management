@@ -642,50 +642,50 @@ class UI:
                 st.experimental_rerun()
         return menu_options[selected_menu]
 
-    @staticmethod
-    def login_page():
-        """ログインページ表示"""
-        st.markdown('<div class="login-container">', unsafe_allow_html=True)
-        st.markdown('<div class="login-card">', unsafe_allow_html=True)
-        st.markdown('<h2 class="login-title">ログイン</h2>', unsafe_allow_html=True)
-        username = st.text_input("ユーザー名", key="username", placeholder="ユーザー名を入力してください",  classname="login-input")
-        password = st.text_input("パスワード", type="password", key="password", placeholder="パスワードを入力してください", classname="login-input")
-        login_button = st.button("ログイン", key="login_button",  classname="login-button")
+@staticmethod
+def login_page():
+    """ログインページ表示"""
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="card-title">ログイン</div>', unsafe_allow_html=True)
 
-        if login_button:
-            if not st.session_state.get("api_base_url"):
-                st.error("APIサーバーのURLを設定してください。")
-            elif not username or not password:
-                st.error("ユーザー名とパスワードを入力してください。")
-            else:
-                # 実際のAPIログイン
-                api = CashPointPayAPI(st.session_state.api_base_url)
-                response = api.login(username, password)
-                if response.get("isSuccess", False):
-                    st.session_state.logged_in = True
-                    st.session_state.username = username
-                    st.success("ログインに成功しました！")
-                    time.sleep(1)
-                    st.experimental_rerun()
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        with st.form("login_form"):
+            username = st.text_input("ユーザー名", key="username")
+            password = st.text_input("パスワード", type="password", key="password")
+            submitted = st.form_submit_button("ログイン")
+            if submitted:
+                if not st.session_state.get("api_base_url"):
+                    st.error("APIサーバーのURLを設定してください。")
+                elif not username or not password:
+                    st.error("ユーザー名とパスワードを入力してください。")
                 else:
-                    error_msg = response.get("errorMsg", "ログインに失敗しました。ユーザー名とパスワードを確認してください。")
-                    st.markdown(f'<div class="error-message">{error_msg}</div>', unsafe_allow_html=True)
+                    api = CashPointPayAPI(st.session_state.api_base_url)
+                    response = api.login(username, password)
+                    if response.get("isSuccess", False):
+                        st.session_state.logged_in = True
+                        st.session_state.username = username
+                        st.success("ログインに成功しました！")
+                        time.sleep(1)
+                        st.experimental_rerun()
+                    else:
+                        st.error("ログインに失敗しました。ユーザー名とパスワードを確認してください。")
 
+    with col2:
         st.markdown("""
-            <div class="app-description">
-                <h3>Cash Point Payマネジメントシステム</h3>
-                <p>このシステムは、Cash Point Payモジュールの管理および操作のための包括的なインターフェースを提供します。</p>
-                <p>以下の操作が可能です：</p>
-                <ul>
-                    <li>支払い処理</li>
-                    <li>キャッシュ管理</li>
-                    <li>システム設定</li>
-                    <li>モニタリングとレポート</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        <div style="padding: 1rem; background-color: #F3F4F6; border-radius: 0.5rem;">
+            <h3>Cash Point Payマネジメントシステム</h3>
+            <p>このシステムは、モジュールの管理・操作用UIです。</p>
+            <ul>
+                <li>支払い処理</li>
+                <li>キャッシュ管理</li>
+                <li>システム設定</li>
+                <li>モニタリングとレポート</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
     @staticmethod
     def dashboard_page(api: CashPointPayAPI):
