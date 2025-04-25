@@ -12,12 +12,10 @@ from typing import Dict, List, Any, Optional, Union, Tuple
 
 # アプリケーション設定
 class Config:
-    # 環境変数から取得するか、デフォルト値を使用
-    API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8080")
-    SESSION_COOKIE = "cash_point_pay_session"
+    # デフォルト値
+    DEFAULT_API_BASE_URL = "http://localhost:8080"
     APP_TITLE = "Cash Point Pay マネジメントシステム"
-    ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
-    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "password")
+    SESSION_COOKIE = "cash_point_pay_session"
     
     # 各種エンドポイント
     ENDPOINTS = {
@@ -494,11 +492,25 @@ class UI:
         
         selected_menu = st.sidebar.radio("", list(menu_options.keys()))
         
+        # APIサーバー設定
+        st.sidebar.markdown("""---""")
+        st.sidebar.markdown('<div class="sidebar-header">API接続設定</div>', unsafe_allow_html=True)
+        
+        api_base_url = st.sidebar.text_input(
+            "APIサーバーURL", 
+            value=st.session_state.get("api_base_url", Config.DEFAULT_API_BASE_URL),
+            key="api_base_url_input"
+        )
+        
+        if api_base_url != st.session_state.get("api_base_url", ""):
+            st.session_state.api_base_url = api_base_url
+            st.sidebar.success("API接続設定が更新されました")
+        
         # サイドバーフッター
         st.sidebar.markdown("""---""")
         if st.session_state.logged_in:
             if st.sidebar.button("ログアウト"):
-                api = CashPointPayAPI(Config.API_BASE_URL)
+                api = CashPointPayAPI(st.session_state.api_base_url)
                 api.logout()
                 st.session_state.logged_in = False
                 st.experimental_rerun()
@@ -520,17 +532,23 @@ class UI:
             login_button = st.button("ログイン")
             
             if login_button:
-                # 実際のAPIログイン
-                api = CashPointPayAPI(Config.API_BASE_URL)
-                response = api.login(username, password)
-                
-                if response.get("isSuccess", False):
-                    st.session_state.logged_in = True
-                    st.success("ログインに成功しました！")
-                    time.sleep(1)
-                    st.experimental_rerun()
+                if not st.session_state.get("api_base_url"):
+                    st.error("APIサーバーのURLを設定してください。")
+                elif not username or not password:
+                    st.error("ユーザー名とパスワードを入力してください。")
                 else:
-                    st.error("ログインに失敗しました。ユーザー名とパスワードを確認してください。")
+                    # 実際のAPIログイン
+                    api = CashPointPayAPI(st.session_state.api_base_url)
+                    response = api.login(username, password)
+                    
+                    if response.get("isSuccess", False):
+                        st.session_state.logged_in = True
+                        st.session_state.username = username
+                        st.success("ログインに成功しました！")
+                        time.sleep(1)
+                        st.experimental_rerun()
+                    else:
+                        st.error("ログインに失敗しました。ユーザー名とパスワードを確認してください。")
         
         with col2:
             st.markdown("""
@@ -640,7 +658,7 @@ class UI:
                     # 円グラフ - 硬貨の金種分布
                     valid_coins = [coin for coin in coins if coin.get("denomination", 0) > 0]  # 0の値を除外
                     if valid_coins:
-                        fig = px.pie(
+                       fig = px.pie(
                             valid_coins, 
                             values="amount", 
                             names="denomination",
@@ -650,8 +668,8 @@ class UI:
                         st.plotly_chart(fig, use_container_width=True)
         
         st.markdown('</div>', unsafe_allow_html=True)
-		
-	  @staticmethod
+    
+    @staticmethod
     def payment_page(api: CashPointPayAPI):
         """支払い処理ページ表示"""
         st.markdown('<div class="card">', unsafe_allow_html=True)
@@ -1137,8 +1155,8 @@ class UI:
                     st.warning("少なくとも1つのアイテムの枚数を1以上に設定してください。")
         
         st.markdown('</div>', unsafe_allow_html=True)
-    
-    @staticmethod
+		
+		@staticmethod
     def system_settings_page(api: CashPointPayAPI):
         """システム設定ページ表示"""
         st.markdown('<div class="card">', unsafe_allow_html=True)
@@ -1264,10 +1282,7 @@ class UI:
                 banknote_settings = banknote_settings_response.get("data", [])
                 
                 if banknote_settings:
-                    # ドラッグ可能なテーブルとして表示
-                    st.write("現在の紙
-					
-# 現在の紙幣設定をテーブルとして表示
+                    # 現在の紙幣設定をテーブルとして表示
                     edited_banknote_settings = []
                     
                     for i, setting in enumerate(banknote_settings):
@@ -1753,15 +1768,18 @@ class CashPointPayApp:
         if "current_transaction_uuid" not in st.session_state:
             st.session_state.current_transaction_uuid = ""
         
+        if "api_base_url" not in st.session_state:
+            st.session_state.api_base_url = Config.DEFAULT_API_BASE_URL
+        
         # ページ設定
         UI.set_page_config()
-        
-        # APIインスタンス
-        self.api = CashPointPayAPI(Config.API_BASE_URL)
     
     def run(self):
         """アプリケーションの実行"""
         UI.header()
+        
+        # APIインスタンス
+        api = CashPointPayAPI(st.session_state.api_base_url)
         
         if not st.session_state.logged_in:
             # 未ログイン状態
@@ -1771,17 +1789,17 @@ class CashPointPayApp:
             selected_page = UI.sidebar_navigation()
             
             if selected_page == "dashboard":
-                UI.dashboard_page(self.api)
+                UI.dashboard_page(api)
             elif selected_page == "payment":
-                UI.payment_page(self.api)
+                UI.payment_page(api)
             elif selected_page == "cash_management":
-                UI.cash_management_page(self.api)
+                UI.cash_management_page(api)
             elif selected_page == "system_settings":
-                UI.system_settings_page(self.api)
+                UI.system_settings_page(api)
             elif selected_page == "error_diagnostics":
-                UI.error_diagnostics_page(self.api)
+                UI.error_diagnostics_page(api)
             elif selected_page == "transaction_history":
-                UI.transaction_history_page(self.api)
+                UI.transaction_history_page(api)
         
         UI.footer()
 
