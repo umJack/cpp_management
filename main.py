@@ -484,20 +484,122 @@ class UI:
             justify-content: center;
             align-items: center;
             height: 100vh;
+            background-color: #F3F4F6; /* ログインページ全体の背景色 */
         }
         .login-card {
-            width: 400px;
-            padding: 2rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 450px; /* カードの幅を調整 */
+            padding: 2.5rem; /* パディングを大きく */
+            border-radius: 0.75rem; /* 角をより丸く */
+            box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.15), 0 3px 7px -2px rgba(0, 0, 0, 0.08); /* 影を調整 */
             background-color: white;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* ホバー効果を追加 */
+        }
+        .login-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.2), 0 4px 8px -2px rgba(0, 0, 0, 0.12);
         }
         .login-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
+            font-size: 2rem; /* タイトルを大きく */
+            font-weight: 700; /* タイトルを太く */
+            margin-bottom: 2rem; /* マージンを大きく */
             color: #1E3A8A;
             text-align: center;
+        }
+        .login-input {
+            padding: 0.75rem; /* 入力フィールドのパディングを調整 */
+            border-radius: 0.375rem; /* 角を丸く */
+            border: 1px solid #D1D5DB; /* ボーダーの色を変更 */
+            margin-bottom: 1.5rem; /* マージンを大きく */
+            width: 100%; /* 幅を100%に */
+            font-size: 1rem; /* フォントサイズを大きく */
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* トランジションを追加 */
+        }
+        .login-input:focus {
+            outline: none; /* フォーカス時のアウトラインを削除 */
+            border-color: #3B82F6; /* フォーカス時のボーダー色を変更 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); /* フォーカス時のシャドウを追加 */
+        }
+
+        .login-button {
+            background-color: #1E3A8A;
+            color: white;
+            padding: 0.8rem 1.5rem; /* ボタンのパディングを調整 */
+            border-radius: 0.375rem; /* 角を丸く */
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            width: 100%; /* 幅を100%に */
+            font-size: 1.1rem; /*フォントサイズを大きく */
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out; /* トランジションを追加 */
+            display: block; /* ブロック要素にする */
+            text-align: center; /* テキストを中央揃え */
+        }
+        .login-button:hover {
+            background-color: #172563;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .login-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-help-text {
+            margin-top: 1.5rem; /* マージンを調整 */
+            font-size: 0.9rem; /* フォントサイズを少し小さく */
+            color: #4B5563;
+            text-align: center;
+        }
+        .login-help-link {
+            color: #3B82F6;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .login-help-link:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #DC2626;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background-color: #FEE2E2;
+            border-radius: 0.375rem;
+            border: 1px solid #FECACA;
+        }
+
+        .app-description {
+            margin-top: 2rem;
+            padding: 1.25rem;
+            background-color: #F3F4F6;
+            border-radius: 0.5rem;
+        }
+
+        .app-description h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #1E3A8A;
+        }
+
+        .app-description p {
+            font-size: 0.9rem;
+            color: #4B5563;
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .app-description ul {
+            list-style-position: inside;
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+
+        .app-description li {
+            font-size: 0.9rem;
+            color: #4B5563;
+            margin-bottom: 0.25rem;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -546,9 +648,9 @@ class UI:
         st.markdown('<div class="login-container">', unsafe_allow_html=True)
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
         st.markdown('<h2 class="login-title">ログイン</h2>', unsafe_allow_html=True)
-        username = st.text_input("ユーザー名", key="username")
-        password = st.text_input("パスワード", type="password", key="password")
-        login_button = st.button("ログイン")
+        username = st.text_input("ユーザー名", key="username", placeholder="ユーザー名を入力してください",  classname="login-input")
+        password = st.text_input("パスワード", type="password", key="password", placeholder="パスワードを入力してください", classname="login-input")
+        login_button = st.button("ログイン", key="login_button",  classname="login-button")
 
         if login_button:
             if not st.session_state.get("api_base_url"):
@@ -566,10 +668,11 @@ class UI:
                     time.sleep(1)
                     st.experimental_rerun()
                 else:
-                    st.error("ログインに失敗しました。ユーザー名とパスワードを確認してください。")
+                    error_msg = response.get("errorMsg", "ログインに失敗しました。ユーザー名とパスワードを確認してください。")
+                    st.markdown(f'<div class="error-message">{error_msg}</div>', unsafe_allow_html=True)
 
         st.markdown("""
-            <div style="margin-top: 2rem; padding: 1rem; background-color: #F3F4F6; border-radius: 0.5rem;">
+            <div class="app-description">
                 <h3>Cash Point Payマネジメントシステム</h3>
                 <p>このシステムは、Cash Point Payモジュールの管理および操作のための包括的なインターフェースを提供します。</p>
                 <p>以下の操作が可能です：</p>
@@ -844,3 +947,4 @@ class CashPointPayApp:
 if __name__ == "__main__":
     app = CashPointPayApp()
     app.run()
+
