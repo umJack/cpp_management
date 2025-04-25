@@ -650,10 +650,8 @@ class UI:
                         st.plotly_chart(fig, use_container_width=True)
         
         st.markdown('</div>', unsafe_allow_html=True)
-        
-        #
 		
-@staticmethod
+	@staticmethod
     def payment_page(api: CashPointPayAPI):
         """支払い処理ページ表示"""
         st.markdown('<div class="card">', unsafe_allow_html=True)
