@@ -658,7 +658,7 @@ class UI:
                     # 円グラフ - 硬貨の金種分布
                     valid_coins = [coin for coin in coins if coin.get("denomination", 0) > 0]  # 0の値を除外
                     if valid_coins:
-                    fig = px.pie(
+                        fig = px.pie(
                             valid_coins, 
                             values="amount", 
                             names="denomination",
